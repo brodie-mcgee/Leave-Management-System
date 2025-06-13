@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -12,65 +12,96 @@ import { TILApplication } from './pages/TILApplication';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LeaveProvider } from './context/LeaveContext';
 import { LeavePoolManagement } from './pages/LeavePoolManagement';
+
 // Protected route component
-const ProtectedRoute = ({
-  children,
-  requiredRole
-}) => {
-  const {
-    user
-  } = useAuth();
+const ProtectedRoute = ({ children, requiredRole }: any) => {
+  const { user } = useAuth();
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
   if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
+
   return children;
 };
+
 // Admin only route
-const AdminRoute = ({
-  children
-}) => {
-  const {
-    user
-  } = useAuth();
+const AdminRoute = ({ children }: any) => {
+  const { user } = useAuth();
+
   if (!user || user.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
+
   return children;
 };
+
 export function App() {
-  return <AuthProvider>
+  return (
+    <AuthProvider>
       <LeaveProvider>
-        <Router>
+        <Router basename="/Leave-Management-System/">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
                   <Layout />
-                </ProtectedRoute>}>
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="apply" element={<LeaveApplication />} />
               <Route path="history" element={<LeaveHistory />} />
-              <Route path="admin" element={<AdminRoute>
+              <Route
+                path="admin"
+                element={
+                  <AdminRoute>
                     <AdminCenter />
-                  </AdminRoute>} />
-              <Route path="admin/users" element={<AdminRoute>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="admin/users"
+                element={
+                  <AdminRoute>
                     <UserManagement />
-                  </AdminRoute>} />
-              <Route path="admin/leave-types" element={<AdminRoute>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="admin/leave-types"
+                element={
+                  <AdminRoute>
                     <LeaveTypeManagement />
-                  </AdminRoute>} />
-              <Route path="admin/leave-pools" element={<AdminRoute>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="admin/leave-pools"
+                element={
+                  <AdminRoute>
                     <LeavePoolManagement />
-                  </AdminRoute>} />
-              <Route path="til" element={<ProtectedRoute>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="til"
+                element={
+                  <ProtectedRoute>
                     <TILApplication />
-                  </ProtectedRoute>} />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
           </Routes>
         </Router>
       </LeaveProvider>
-    </AuthProvider>;
+    </AuthProvider>
+  );
 }
